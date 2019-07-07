@@ -1,0 +1,22 @@
+Sample code in Kotlin, interacting with TMDB API.
+Using:
+ Retrofit2,
+ Dagger2,
+ RxJava2,
+ Picasso,
+ Material Design,
+ CardViews,
+ RecyclerViews...
+
+Testing with:
+ JUnit testing,
+ Robolectric,
+ Mockito
+
+TODO List
+- Add more Javadoc, specially in deps package and its usage
+- Probably there is a way to avoid null checking in LandingFragment views
+- More tests for MovieDataRepository
+- Tests for DateFormatUtils
+- Tests for LandingPresenter
+- Could a custom ScrollListener improve the code readability or performance?
