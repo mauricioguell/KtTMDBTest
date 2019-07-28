@@ -64,11 +64,8 @@ class MoviesAdapter :
             )
         }
 
-        if (movie.overview.isEmpty()) {
-            holder.overview.text = holder.noOverviewAvailableText
-        } else {
-            holder.overview.text = movie.overview
-        }
+        holder.overview.text = if (movie.overview.isEmpty()) holder.noOverviewAvailableText else movie.overview
+
         val transformation = RoundedCornersTransformation(
             holder.posterCornerRadius, holder.posterCornerMargin
         )

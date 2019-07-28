@@ -21,4 +21,6 @@ interface LandingView {
     fun addMovies(movies: List<Movie>)
 
     fun scrollToTop()
+    
+    fun markLastPage()
 }
