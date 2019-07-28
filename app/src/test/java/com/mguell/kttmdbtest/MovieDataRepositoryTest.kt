@@ -63,7 +63,6 @@ class MovieDataRepositoryTest {
     }
 
     private fun givenMovies() : MovieResponse {
-        val movieResponse = MovieResponse()
         val movieEntityList : ArrayList<MovieEntity>  = ArrayList()
 
         val spiderman = MovieEntity(
@@ -81,7 +80,6 @@ class MovieDataRepositoryTest {
         )
         movieEntityList.add(spiderman)
         movieEntityList.add(toyStory)
-        movieResponse.setMovies(movieEntityList)
-        return movieResponse
+        return MovieResponse(movieEntityList)
     }
 }

@@ -19,4 +19,3 @@ TODO List
 - More tests for MovieDataRepository
 - Tests for DateFormatUtils
 - Tests for LandingPresenter
-- Could a custom ScrollListener improve the code readability or performance?

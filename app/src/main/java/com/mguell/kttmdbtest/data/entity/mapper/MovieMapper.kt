@@ -12,7 +12,7 @@ class MovieMapper {
 
     fun transformList(movieResponse: MovieResponse): List<Movie> {
         val townships = ArrayList<Movie>()
-        for (movieEntity in movieResponse.getMovies()) {
+        for (movieEntity in movieResponse.movies) {
             townships.add(transform(movieEntity))
         }
         return townships

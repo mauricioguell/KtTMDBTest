@@ -2,19 +2,21 @@ package com.mguell.kttmdbtest.presentation.presenter
 
 import android.util.Log
 import android.view.View
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import com.mguell.kttmdbtest.domain.interactor.GetMoviesByPopularity
 import com.mguell.kttmdbtest.domain.interactor.GetMoviesByQuery
 import com.mguell.kttmdbtest.domain.model.Movie
+import com.mguell.kttmdbtest.presentation.view.adapter.PagingScrollListener
 import com.mguell.kttmdbtest.presentation.view.landing.LandingView
+import com.mguell.kttmdbtest.utils.Constants
 import io.reactivex.observers.DisposableObserver
 
 
 class LandingPresenter(
     private val getMoviesByPopularity: GetMoviesByPopularity,
     private val getMoviesByQuery: GetMoviesByQuery
-) {
+) : PagingScrollListener.LoadMoreItemsListener {
+
     private lateinit var view: LandingView
 
     init {
@@ -35,10 +37,6 @@ class LandingPresenter(
 
     private fun initializePage() {
         this.currentPage = 1
-    }
-
-    private fun passPage() {
-        this.currentPage += 1
     }
 
     private fun getQueryText(): String {
@@ -63,22 +61,6 @@ class LandingPresenter(
     }
 
     /**
-     * Computes if the last visible item is displayed.
-     *
-     * @return true if the last item of the adapter is already displayed, false otherwise.
-     */
-    private fun isLastItemDisplaying(): Boolean {
-        if (view.getMoviesCount() != 0) {
-            val layoutManager = view.getLayoutManager() as LinearLayoutManager
-            val visibleItemCount = layoutManager.childCount
-            val totalItemCount = layoutManager.itemCount
-            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-            return visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0
-        }
-        return false
-    }
-
-    /**
      * Fills the RecyclerView adapter with the most popular movies from TMDB.
      */
     private fun showMoviesByPopularity() {
@@ -97,14 +79,12 @@ class LandingPresenter(
         getMoviesByQuery.execute(MovieListByQueryObserver(), GetMoviesByQuery.Params(text, currentPage))
     }
 
-    fun scrollMovieList() {
-        if (isLastItemDisplaying() && !view.isLoadingMoviesBarVisible()) {
-            passPage()
-            if (getQueryText().isEmpty()) {
-                showMoviesByPopularity()
-            } else {
-                showMoviesByQuery(getQueryText())
-            }
+    override fun loadMoreItems(page: Int) {
+        this.currentPage = page
+        if (getQueryText().isEmpty()) {
+            showMoviesByPopularity()
+        } else {
+            showMoviesByQuery(getQueryText())
         }
     }
 
@@ -153,6 +133,8 @@ class LandingPresenter(
                 Log.d(TAG, "getFilteredMovies adding")
                 view.addMovies(movies)
             }
+            if (movies.size < Constants.QUERY_NUM_RESULTS)
+                view.markLastPage()
             view.setLoadingMoviesBarVisibility(View.GONE)
         }
     }

@@ -13,9 +13,9 @@ import com.mguell.kttmdbtest.presentation.MainActivity
 import com.mguell.kttmdbtest.presentation.presenter.LandingPresenter
 import com.mguell.kttmdbtest.presentation.view.BaseFragment
 import com.mguell.kttmdbtest.presentation.view.adapter.MoviesAdapter
+import com.mguell.kttmdbtest.presentation.view.adapter.PagingScrollListener
 import com.mguell.kttmdbtest.utils.Constants
 import com.mguell.kttmdbtest.utils.RecyclerViewMargin
-import kotlinx.android.synthetic.main.landing_fragment.pbLoadingMovies
 import kotlinx.android.synthetic.main.landing_fragment.*
 import javax.inject.Inject
 
@@ -32,38 +32,44 @@ class LandingFragment : BaseFragment(), LandingView {
      * ScrollListener that checks if the last item is displayed, if it is, loads another
      * page of movies, by popularity or by query depending on the current type of search.
      */
-    private val mScrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            landingPresenter.scrollMovieList()
-        }
-    }
+    private lateinit var scrollListener: PagingScrollListener
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? {
 
         return inflater.inflate(R.layout.landing_fragment, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        rvCards.layoutManager = LinearLayoutManager(ctx)
+        val layoutManager = LinearLayoutManager(ctx)
+        rvCards.layoutManager = layoutManager
         rvCards.setHasFixedSize(true)
         rvCards.adapter = MoviesAdapter()
-        rvCards.addOnScrollListener(mScrollListener)
+        scrollListener = PagingScrollListener(layoutManager, landingPresenter)
+        rvCards.addOnScrollListener(scrollListener)
         val decoration = RecyclerViewMargin(
             resources.getDimension(R.dimen.distance_between_recycler_view_items).toInt(),
             resources.getInteger(R.integer.movie_list_column_number)
         )
         rvCards.addItemDecoration(decoration)
         landingPresenter.setView(this)
-        if (arguments != null) {
-            this.landingPresenter.setQueryText(arguments!!.getString(Constants.QUERY_TEXT_KEY, ""))
-        } else {
-            this.landingPresenter.setQueryText("")
-        }
+        landingPresenter.setQueryText(
+            if (arguments != null)
+                arguments!!.getString(Constants.QUERY_TEXT_KEY, "")
+            else ""
+        )
+    }
+
+    fun onQueryTextChange(queryText: String) {
+        scrollListener.markLastPage(false)
+        this.landingPresenter.setQueryText(queryText)
     }
 
     override fun setLoadingMoviesBarVisibility(visibility: Int) {
         pbLoadingMovies?.visibility = visibility
+        scrollListener.markLoading(visibility == View.VISIBLE)
     }
 
     override fun isLoadingMoviesBarVisible(): Boolean {
@@ -94,8 +100,8 @@ class LandingFragment : BaseFragment(), LandingView {
         return activity as MainActivity?
     }
 
-    fun onQueryTextChange(queryText: String) {
-        this.landingPresenter.setQueryText(queryText)
+    override fun markLastPage() {
+        scrollListener.markLastPage(true)
     }
 
     companion object {

@@ -24,5 +24,4 @@ class AppModule {
     fun provideMovieRepository(): MovieRepository {
         return MovieDataRepository(MovieDataStore())
     }
-
 }
